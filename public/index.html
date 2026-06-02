@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAI/PPAP Agent</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #080d1a; color: #e2e8f0; font-family: 'Courier New', monospace; min-height: 100vh; padding: 16px; }
+h1 { font-size: 22px; font-weight: 800; color: #f8fafc; }
+.slash { color: #f97316; }
+.muted { color: #475569; font-weight: 400; }
+.subtitle { font-size: 10px; color: #475569; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; }
+.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 14px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+.card { background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+.sec-title { font-size: 10px; color: #f97316; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 12px; font-weight: 700; }
+.btn { background: #f97316; color: #fff; border: none; border-radius: 6px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; font-family: inherit; }
+.btn:hover { background: #ea6c08; }
+.btn2 { background: #1e293b; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-sm { padding: 8px 16px; font-size: 12px; width: auto; }
+input, select { background: #1e293b; border: 1px solid #334155; border-radius: 5px; padding: 7px 10px; color: #f1f5f9; font-size: 12px; outline: none; font-family: inherit; width: 100%; }
+input:focus, select:focus { border-color: #f97316; }
+.lbl { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
+.drop-zone { border: 2px dashed #334155; border-radius: 8px; padding: 28px; text-align: center; cursor: pointer; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; transition: border-color 0.2s; }
+.drop-zone:hover { border-color: #f97316; }
+.drop-zone img { max-height: 260px; max-width: 100%; border-radius: 4px; object-fit: contain; }
+.error-box { color: #f87171; background: #1c0a0a; border: 1px solid #7f1d1d; border-radius: 6px; padding: 12px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; margin-top: 10px; }
+.tab-bar { border-bottom: 1px solid #1e293b; margin-bottom: 14px; display: flex; }
+.tab { padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; border-bottom: 2px solid transparent; color: #64748b; background: transparent; font-family: inherit; }
+.tab.active { border-bottom-color: #f97316; color: #f97316; }
+table { width: 100%; border-collapse: collapse; font-size: 11px; }
+th { padding: 6px 10px; text-align: left; background: #1e293b; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #334155; white-space: nowrap; }
+td { padding: 6px 10px; border-bottom: 1px solid #131e30; color: #cbd5e1; vertical-align: middle; }
+tr:nth-child(even) td { background: #0b1425; }
+.balloon { width: 22px; height: 22px; min-width: 22px; border-radius: 50%; background: #f97316; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; margin: 0 auto; }
+.balloon-blue { background: #1e40af !important; }
+.legend-row { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid #131e30; }
+.cert-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #131e30; }
+.sig-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.tol-box { background: #1e293b; border-radius: 6px; padding: 10px; }
+.tol-label { font-size: 10px; color: #64748b; text-transform: uppercase; }
+.tol-val { color: #f97316; font-weight: 700; font-size: 14px; margin-top: 3px; }
+.spinner { width: 48px; height: 48px; border: 3px solid #1e293b; border-top-color: #f97316; border-radius: 50%; animation: spin 1s linear infinite; }
+.processing-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; gap: 16px; text-align: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.pulse { animation: pulse 2s ease infinite; }
+.drawing-wrap { position: relative; display: inline-block; width: 100%; }
+.drawing-wrap img { width: 100%; border-radius: 4px; display: block; }
+.overlay-balloon { position: absolute; width: 22px; height: 22px; border-radius: 50%; background: #f97316; border: 2px solid #fff; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; box-shadow: 0 1px 6px rgba(0,0,0,.8); transform: translate(-50%,-50%); z-index: 10; pointer-events: none; }
+.mode-btns { display: flex; gap: 8px; }
+.mode-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.mode-btn.active { color: #f97316; border-color: #f97316; }
+.hidden { display: none !important; }
+.result-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.badge { background: #14532d; color: #4ade80; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.action-btns { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+input.meas { width: 72px; }
+input.meas.filled { background: #1a2e1a; color: #4ade80; border-color: #166534; }
+select.conf { width: 54px; }
+.notes-cell { color: #64748b; font-size: 10px; }
+.overflow-x { overflow-x: auto; }
+.step-pill { padding: 4px 12px; border-radius: 20px; background: #1e293b; color: #64748b; font-size: 11px; }
+.step-pill.done { background: #14532d; color: #4ade80; }
+.step-pill.active { background: #431407; color: #fb923c; }
+.progress-steps { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
+</style>
+</head>
+<body>
+<div id="screen-upload">
+  <div class="header">
+    <div>
+      <h1>FAI<span class="slash">/</span>PPAP <span class="muted">Agent</span></h1>
+      <div class="subtitle">Sheet Metal First Article Inspection</div>
+    </div>
+    <div class="mode-btns">
+      <button class="mode-btn active" onclick="setMode('generic')">Generic AS9102</button>
+      <button class="mode-btn" onclick="setMode('custom')">Custom Branding</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-title">Upload Blueprint</div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+      <div id="drop-placeholder">
+        <div style="font-size:40px;margin-bottom:8px">📄</div>
+        <div style="color:#94a3b8;font-size:14px">Tap or drop blueprint here</div>
+        <div style="color:#475569;font-size:11px;margin-top:4px">PNG · JPG · WEBP</div>
+      </div>
+      <div id="drop-preview" class="hidden" style="width:100%">
+        <img id="preview-img" alt="blueprint">
+        <div style="color:#4ade80;font-size:12px;margin-top:8px">✓ Ready to process</div>
+      </div>
+    </div>
+    <input type="file" id="file-input" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="handleFile(this.files[0])">
+  </div>
+  <div class="card hidden" id="company-card">
+    <div class="sec-title">Company Header</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="lbl">Company Name</label><input id="co-name" placeholder="Acme Manufacturing"></div>
+      <div><label class="lbl">Address</label><input id="co-addr" placeholder="City, State"></div>
+      <div style="grid-column:1/-1"><label class="lbl">Inspector Name</label><input id="co-insp" placeholder="Inspector Name"></div>
+    </div>
+  </div>
+  <div id="process-btn-wrap" class="hidden" style="margin-top:4px">
+    <button class="btn" onclick="startProcess()">⚡ Process Drawing & Generate FAI</button>
+  </div>
+  <div id="error-wrap" class="hidden" style="margin-top:10px">
+    <div class="error-box" id="error-msg"></div>
+  </div>
+</div><div id="screen-processing" class="hidden processing-screen">
+  <h1>FAI<span class="slash">/</span>PPAP <span class="muted">Agent</span></h1>
+  <div class="spinner"></div>
+  <div id="status-msg" class="pulse" style="color:#94a3b8;font-size:13px;margin-top:4px">Analyzing drawing…</div>
+  <div style="font-size:11px;color:#334155;max-width:280px">Takes 20–40 seconds</div>
+  <div class="progress-steps">
+    <div class="step-pill" id="pill-1">1 · Read Drawing</div>
+    <div class="step-pill" id="pill-2">2 · Map Balloons</div>
+    <div class="step-pill" id="pill-3">3 · Build Form</div>
+  </div>
+</div><div id="screen-results" class="hidden">
+  <div class="header result-header">
+    <div>
+      <h1>FAI<span class="slash">/</span>PPAP <span class="muted">Agent</span></h1>
+      <div style="font-size:11px;color:#64748b;margin-top:2px" id="result-subtitle"></div>
+    </div>
+    <div class="action-btns">
+      <span class="badge" id="char-count"></span>
+      <button class="btn2" onclick="resetApp()">↩ New</button>
+      <button class="btn2" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-sm" onclick="exportHTML()">⬇ FAI Report</button>
+    </div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="showTab('balloons',this)">📐 Drawing</button>
+    <button class="tab" onclick="showTab('form',this)">📋 FAI Form</button>
+    <button class="tab" onclick="showTab('info',this)">ℹ Info</button>
+  </div>
+  <div id="tab-balloons">
+    <div class="card">
+      <div class="sec-title">Ballooned Drawing</div>
+      <div class="drawing-wrap"><img id="result-img" alt="blueprint"><div id="balloon-overlay"></div></div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Balloon Legend</div>
+      <div id="legend-list"></div>
+    </div>
+  </div>
+  <div id="tab-form" class="hidden">
+    <div class="card">
+      <div class="sec-title">Dimensional Results</div>
+      <div class="overflow-x">
+        <table>
+          <thead><tr><th>#</th><th>Characteristic</th><th>Nominal</th><th>Tol+</th><th>Tol−</th><th>Actual</th><th>Y/N</th><th>Notes</th></tr></thead>
+          <tbody id="form-rows"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card"><div class="sec-title">Certifications</div><div id="cert-list"></div></div>
+    <div class="card">
+      <div class="sig-grid">
+        <div><label class="lbl">Inspector</label><input placeholder="Signature / Date"></div>
+        <div><label class="lbl">Quality Mgr</label><input placeholder="Signature / Date"></div>
+        <div><label class="lbl">Customer</label><input placeholder="Signature / Date"></div>
+      </div>
+    </div>
+  </div>
+  <div id="tab-info" class="hidden">
+    <div class="card">
+      <div class="sec-title">Part Information</div>
+      <div class="info-grid" id="part-info-grid"></div>
+      <div id="notes-section"></div>
+      <div id="tol-section"></div>
+    </div>
+  </div>
+</div><script>
+let imgFile=null,imgSrc=null,extracted=null,formData=null,balloons=[],mode='generic';
+function setMode(m){mode=m;document.querySelectorAll('.mode-btn').forEach((b,i)=>b.classList.toggle('active',(i===0&&m==='generic')||(i===1&&m==='custom')));document.getElementById('company-card').classList.toggle('hidden',m!=='custom');}
+function handleDrop(e){e.preventDefault();handleFile(e.dataTransfer.files[0]);}
+function handleFile(file){if(!file)return;imgFile=file;const r=new FileReader();r.onload=e=>{imgSrc=e.target.result;document.getElementById('drop-placeholder').classList.add('hidden');document.getElementById('drop-preview').classList.remove('hidden');document.getElementById('preview-img').src=imgSrc;document.getElementById('process-btn-wrap').classList.remove('hidden');document.getElementById('error-wrap').classList.add('hidden');};r.readAsDataURL(file);}
+async function startProcess(){
+  if(!imgFile){showError('No image loaded');return;}
+  showScreen('processing');setPill(1,'active');
+  const fd=new FormData();fd.append('file',imgFile);
+  try{
+    const res=await fetch('/api/analyze',{method:'POST',body:fd});
+    const json=await res.json();
+    if(!res.ok)throw new Error(json.error||'Server error '+res.status);
+    extracted=json.extracted;balloons=json.balloons;formData=json.formData;
+  }catch(e){showScreen('upload');showError(e.message);return;}
+  setPill(1,'done');setPill(2,'done');setPill(3,'done');
+  renderResults();showScreen('results');
+}
+function renderResults(){
+  const s1=formData.s1||{},chars=extracted.characteristics||[],rows=formData.rows||[];
+  document.getElementById('result-subtitle').textContent=`${s1.partName||'Part'} · ${s1.partNumber||'—'} · Rev ${s1.revision||'—'}`;
+  document.getElementById('char-count').textContent=`${chars.length} characteristics`;
+  document.getElementById('result-img').src=imgSrc;
+  const ov=document.getElementById('balloon-overlay');ov.innerHTML='';
+  balloons.forEach(b=>{const el=document.createElement('div');el.className='overlay-balloon';el.style.left=b.x+'%';el.style.top=b.y+'%';el.textContent=b.id;ov.appendChild(el);});
+  document.getElementById('legend-list').innerHTML=chars.map(c=>`<div class="legend-row"><div class="balloon">${c.id}</div><div><div style="font-size:12px;color:#f1f5f9">${c.description}</div><div style="font-size:11px;color:#64748b">Nominal: <span style="color:#f97316">${c.nominal} ${c.unit||''}</span> · Tol: ${c.tolerance||'—'}</div></div></div>`).join('');
+  document.getElementById('form-rows').innerHTML=rows.map((r,i)=>`<tr><td style="text-align:center"><div class="balloon">${r.n}</div></td><td style="max-width:180px;font-size:11px">${r.desc}</td><td style="color:#f97316;font-weight:600">${r.nominal}</td><td style="color:#4ade80">${r.tolPlus}</td><td style="color:#f87171">${r.tolMinus}</td><td><input class="meas" id="meas-${i}" placeholder="____" oninput="this.classList.toggle('filled',!!this.value)"></td><td><select class="conf" id="conf-${i}"><option value="">—</option><option>Y</option><option>N</option></select></td><td class="notes-cell">${r.notes||''}</td></tr>`).join('');
+  document.getElementById('cert-list').innerHTML=(formData.certs||['Material Certification']).map((c,i)=>`<div class="cert-row"><div class="balloon balloon-blue">${i+1}</div><span style="flex:1;font-size:12px">${c}</span><input placeholder="Cert #" style="width:140px"><select style="width:54px"><option>—</option><option>Y</option><option>N</option></select></div>`).join('');
+  document.getElementById('part-info-grid').innerHTML=Object.entries(s1).map(([k,v])=>`<div><label class="lbl">${k.replace(/(\[A-Z\])/g,' $1')}</label><input value="${esc(v||'')}"></div>`).join('');
+  const notes=extracted.generalNotes||[];
+  document.getElementById('notes-section').innerHTML=notes.length?`<div style="margin-top:16px"><div class="sec-title">General Notes</div>${notes.map((n,i)=>`<div style="padding:5px 0;border-bottom:1px solid #131e30;color:#94a3b8;font-size:12px">${i+1}. ${esc(n)}</div>`).join('')}</div>`:'';
+  const tols=Object.entries(extracted.tolerances||{}).filter(([,v])=>v);
+  document.getElementById('tol-section').innerHTML=tols.length?`<div style="margin-top:16px"><div class="sec-title">General Tolerances</div><div class="tol-grid">${tols.map((\[k,v\])=>`<div class="tol-box"><div class="tol-label">${k}</div><div class="tol-val">${esc(v)}</div></div>`).join('')}</div></div>`:'';
+}
+function exportCSV(){
+  if(!formData)return;const s1=formData.s1||{},rows=formData.rows||[];
+  let csv=`FAI Report\nPart Number,${s1.partNumber||''}\nPart Name,${s1.partName||''}\nRevision,${s1.revision||''}\n\nBalloon#,Characteristic,Nominal,Tol+,Tol-,Actual,Conforming,Notes\n`;
+  rows.forEach((r,i)=>{const a=document.getElementById(`meas-${i}`)?.value||'';const c=document.getElementById(`conf-${i}`)?.value||'';csv+=`${r.n},"${r.desc}",${r.nominal},${r.tolPlus},${r.tolMinus},"${a}","${c}","${r.notes||''}"\n`;});
+  dl(csv,`FAI_${s1.partNumber||'part'}.csv`,'text/csv');
+}
+function exportHTML(){
+  if(!formData)return;const s1=formData.s1||{},rows=formData.rows||[];
+  const coName=document.getElementById('co-name')?.value||'';
+  const coAddr=document.getElementById('co-addr')?.value||'';
+  const coInsp=document.getElementById('co-insp')?.value||'';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FAI</title><style>body{font-family:Arial,sans-serif;margin:30px;font-size:11px}h2{color:#1e40af;margin:0 0 4px}.hdr{display:flex;justify-content:space-between;border-bottom:2px solid #1e40af;padding-bottom:12px;margin-bottom:18px}.st{background:#1e40af;color:#fff;padding:4px 10px;font-weight:700;margin-bottom:6px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}.f{border:1px solid #d1d5db;padding:5px 8px}.fl{font-size:9px;color:#6b7280;text-transform:uppercase}.fv{font-weight:600}table{width:100%;border-collapse:collapse}th{background:#f1f5f9;padding:5px 8px;border:1px solid #cbd5e1;font-size:10px;text-align:left}td{padding:4px 8px;border:1px solid #e2e8f0;font-size:10px}.mc{background:#fef9c3}.sigs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:30px}.sl{border-top:1px solid #111;padding-top:4px;text-align:center;font-size:10px}</style></head><body><div class="hdr"><div>${coName?`<div style="font-size:18px;font-weight:700">${coName}</div>`:''}${coAddr?`<div style="color:#6b7280">${coAddr}</div>`:''}<h2>First Article Inspection Report</h2><div style="color:#6b7280;font-size:10px">Per AS9102 Rev B</div></div><div style="text-align:right"><div style="font-size:10px;color:#6b7280">Date</div><div style="font-weight:700">${s1.date||new Date().toLocaleDateString()}</div></div></div><div style="margin-bottom:18px"><div class="st">SECTION 1 — PART INFORMATION</div><div class="grid">${[['Part Number',s1.partNumber],['Part Name',s1.partName],['Revision',s1.revision],['Drawing No.',s1.drawingNumber],['Material',s1.material],['Finish',s1.finish],['Inspector',coInsp||'____________'],['Qty',s1.quantity||'1']].map(([l,v])=>`<div class="f"><div class="fl">${l}</div><div class="fv">${v||'—'}</div></div>`).join('')}</div></div><div style="margin-bottom:18px"><div class="st">SECTION 2 — DIMENSIONAL RESULTS</div><table><thead><tr><th>Balloon#</th><th>Characteristic</th><th>Nominal</th><th>Tol+</th><th>Tol-</th><th>Actual</th><th>Y/N</th><th>Notes</th></tr></thead><tbody>${rows.map((r,i)=>{const a=document.getElementById('meas-'+i)?.value||'\_\_\_\_';const c=document.getElementById('conf-'+i)?.value||'\_\_\_\_';return`<tr><td style="text-align:center;font-weight:700">${r.n}</td><td>${r.desc}</td><td>${r.nominal}</td><td>${r.tolPlus}</td><td>${r.tolMinus}</td><td class="mc">${a}</td><td class="mc" style="text-align:center">${c}</td><td>${r.notes||''}</td></tr>`;}).join('')}</tbody></table></div><div style="margin-bottom:18px"><div class="st">SECTION 3 — CERTIFICATIONS</div><table><thead><tr><th>#</th><th>Certification</th><th>Cert Number</th><th>Y/N</th></tr></thead><tbody>${(formData.certs||['Material Certification']).map((c,i)=>`<tr><td>${i+1}</td><td>${c}</td><td style="min-width:120px">&nbsp;</td><td style="text-align:center">____</td></tr>`).join('')}</tbody></table></div><div class="sigs"><div class="sl">Inspector Signature / Date</div><div class="sl">Quality Manager / Date</div><div class="sl">Customer Approval / Date</div></div></body></html>`;
+
+dl(html,FAI_${s1.partNumber||'part'}\_Rev${s1.revision||'A'}.html,‘text/html’);
+}
+function dl(content,filename,type){const a=document.createElement(‘a’);a.href=URL.createObjectURL(new Blob([content],{type}));a.download=filename;a.click();}
+function esc(s){return String(s).replace(/&/g,’&’).replace(/</g,’<’).replace(/>/g,’>’).replace(/”/g,’"’);}
+function showScreen(name){[‘upload’,‘processing’,‘results’].forEach(s=>document.getElementById(‘screen-’+s).classList.toggle(‘hidden’,s!==name));}
+function setStatus(msg){document.getElementById(‘status-msg’).textContent=msg;}
+function showError(msg){document.getElementById(‘error-wrap’).classList.remove(‘hidden’);document.getElementById(‘error-msg’).textContent=msg;}
+function setPill(n,state){const el=document.getElementById(‘pill-’+n);el.classList.remove(‘done’,‘active’);if(state)el.classList.add(state);}
+function showTab(name,btn){[‘balloons’,‘form’,‘info’].forEach(t=>document.getElementById(‘tab-’+t).classList.toggle(‘hidden’,t!==name));document.querySelectorAll(’.tab’).forEach(b=>b.classList.remove(‘active’));btn.classList.add(‘active’);}
+function resetApp(){imgFile=null;imgSrc=null;extracted=null;formData=null;balloons=[];document.getElementById(‘drop-placeholder’).classList.remove(‘hidden’);document.getElementById(‘drop-preview’).classList.add(‘hidden’);document.getElementById(‘process-btn-wrap’).classList.add(‘hidden’);document.getElementById(‘error-wrap’).classList.add(‘hidden’);showScreen(‘upload’);}
+</script>
+
+</body>
+</html>
