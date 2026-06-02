@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAI/PPAP Agent</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #080d1a;
+  color: #e2e8f0;
+  font-family: "Courier New", monospace;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.slash { color: #f97316; }
+.muted { color: #475569; font-weight: 400; }
+
+.subtitle {
+  font-size: 10px;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-top: 2px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.sec-title {
+  font-size: 10px;
+  color: #f97316;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.btn {
+  background: #f97316;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+}
+
+.btn:hover { background: #ea6c08; }
+
+.btn2 {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+  width: auto;
+}
+
+input, select {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 5px;
+  padding: 7px 10px;
+  color: #f1f5f9;
+  font-size: 12px;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+input:focus, select:focus {
+  border-color: #f97316;
+}
+
+.lbl {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.drop-zone {
+  border: 2px dashed #334155;
+  border-radius: 8px;
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.drop-zone:hover {
+  border-color: #f97316;
+}
+
+.drop-zone img {
+  max-height: 260px;
+  max-width: 100%;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.error-box {
+  color: #f87171;
+  background: #1c0a0a;
+  border: 1px solid #7f1d1d;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: 10px;
+}
+
+.tab-bar {
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 14px;
+  display: flex;
+}
+
+.tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #64748b;
+  background: transparent;
+  font-family: inherit;
+}
+
+.tab.active {
+  border-bottom-color: #f97316;
+  color: #f97316;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+th {
+  padding: 6px 10px;
+  text-align: left;
+  background: #1e293b;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap;
+}
+
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #131e30;
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+tr:nth-child(even) td {
+  background: #0b1425;
+}
+
+.balloon {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  background: #f97316;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  margin: 0 auto;
+}
+
+.balloon-blue {
+  background: #1e40af !important;
+}
+
+.legend-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 7px 0;
+  border-bottom: 1px solid #131e30;
+}
+
+.cert-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #131e30;
+}
+
+.sig-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #1e293b;
+  border-top-color: #f97316;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.processing-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 16px;
+  text-align: center;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: .4; }
+}
+
+.pulse {
+  animation: pulse 2s ease infinite;
+}
+
+.drawing-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.drawing-wrap img {
+  width: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.overlay-balloon {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #f97316;
+  border: 2px solid #fff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  box-shadow: 0 1px 6px rgba(0,0,0,.8);
+  transform: translate(-50%,-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.mode-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-btn {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mode-btn.active {
+  color: #f97316;
+  border-color: #f97316;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  background: #14532d;
+  color: #4ade80;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.action-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+input.meas {
+  width: 72px;
+}
+
+.notes-cell {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.overflow-x {
+  overflow-x: auto;
+}
+
+.step-pill {
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #1e293b;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.step-pill.done {
+  background: #14532d;
+  color: #4ade80;
+}
+
+.step-pill.active {
+  background: #431407;
+  color: #fb923c;
+}
+
+.progress-steps {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="screen-upload">
+  <div class="header">
+    <div>
+      <h1>FAI<span class="slash">/</span>PPAP <span class="muted">Agent</span></h1>
+      <div class="subtitle">Sheet Metal First Article Inspection</div>
+    </div>
+
+    <div class="mode-btns">
+      <button class="mode-btn active" onclick="setMode('generic')">Generic AS9102</button>
+      <button class="mode-btn" onclick="setMode('custom')">Custom Branding</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-title">Upload Blueprint</div>
+
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+      <div id="drop-placeholder">
+        <div style="font-size:40px;margin-bottom:8px">📄</div>
+        <div style="color:#94a3b8;font-size:14px">Tap or drop blueprint here</div>
+        <div style="color:#475569;font-size:11px;margin-top:4px">PNG · JPG · WEBP</div>
+      </div>
+
+      <div id="drop-preview" class="hidden" style="width:100%">
+        <img id="preview-img" alt="blueprint">
+        <div style="color:#4ade80;font-size:12px;margin-top:8px">✓ Ready to process</div>
+      </div>
+    </div>
+
+    <input type="file" id="file-input" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="handleFile(this.files[0])">
+  </div>
+
+  <div class="card hidden" id="company-card">
+    <div class="sec-title">Company Header</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <label class="lbl">Company Name</label>
+        <input id="co-name" placeholder="Acme Manufacturing">
+      </div>
+
+      <div>
+        <label class="lbl">Address</label>
+        <input id="co-addr" placeholder="City, State">
+      </div>
+
+      <div style="grid-column:1/-1">
+        <label class="lbl">Inspector Name</label>
+        <input id="co-insp" placeholder="Inspector Name">
+      </div>
+    </div>
+  </div>
+
+  <div id="process-btn-wrap" class="hidden" style="margin-top:4px">
+    <button class="btn" onclick="startProcess()">⚡ Process Drawing & Generate FAI</button>
+  </div>
+
+  <div id="error-wrap" class="hidden" style="margin-top:10px">
+    <div class="error-box" id="error-msg"></div>
+  </div>
+</div>
+
+<div id="screen-processing" class="hidden processing-screen">
+  <h1>FAI<span class="slash">/</span>PPAP <span class="muted">Agent</span></h1>
+  <div class="spinner"></div>
+  <div id="status-msg" class="pulse" style="color:#94a3b8;font-size:13px;margin-top:4px">Analyzing drawing...</div>
+  <div style="font-size:11px;color:#334155;max-width:280px">Takes 20-40 seconds</div>
+
+  <div class="progress-steps">
+    <div class="step-pill" id="pill-1">1 · Read Drawing</div>
+    <div class="step-pill" id="pill-2">2 · Map Balloons</div>
+    <div class="step-pill" id="pill-3">3 · Build Form</div>
+  </div>
+</div>
+
+<div id="screen-results" class="hidden">
+  <div class="header result-header">
+    <div>
+      <h1>FAI<span class="slash">/</span>PPAP <span class="muted">Agent</span></h1>
+      <div style="font-size:11px;color:#64748b;margin-top:2px" id="result-subtitle"></div>
+    </div>
+
+    <div class="action-btns">
+      <span class="badge" id="char-count"></span>
+      <button class="btn2" onclick="resetApp()">↩ New</button>
+      <button class="btn2" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-sm" onclick="exportHTML()">⬇ FAI Report</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="showTab('balloons',this)">📐 Drawing</button>
+    <button class="tab" onclick="showTab('form',this)">📋 FAI Form</button>
+    <button class="tab" onclick="showTab('info',this)">ℹ Info</button>
+  </div>
+
+  <div id="tab-balloons">
+    <div class="card">
+      <div class="sec-title">Ballooned Drawing</div>
+      <div class="drawing-wrap">
+        <img id="result-img" alt="blueprint">
+        <div id="balloon-overlay"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">Balloon Legend</div>
+      <div id="legend-list"></div>
+    </div>
+  </div>
+
+  <div id="tab-form" class="hidden">
+    <div class="card">
+      <div class="sec-title">Dimensional Results</div>
+
+      <div class="overflow-x">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Characteristic</th>
+              <th>Nominal</th>
+              <th>Tol+</th>
+              <th>Tol-</th>
+              <th>Actual</th>
+              <th>Y/N</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+
+          <tbody id="form-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">Certifications</div>
+      <div id="cert-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="sig-grid">
+        <div>
+          <label class="lbl">Inspector</label>
+          <input placeholder="Signature / Date">
+        </div>
+
+        <div>
+          <label class="lbl">Quality Mgr</label>
+          <input placeholder="Signature / Date">
+        </div>
+
+        <div>
+          <label class="lbl">Customer</label>
+          <input placeholder="Signature / Date">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-info" class="hidden">
+    <div class="card">
+      <div class="sec-title">Part Information</div>
+      <div class="info-grid" id="part-info-grid"></div>
+      <div id="notes-section"></div>
+      <div id="tol-section"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let imgFile = null;
+let imgSrc = null;
+let extracted = null;
+let formData = null;
+let balloons = [];
+let mode = "generic";
+
+function setMode(m) {
+  mode = m;
+
+  document.querySelectorAll(".mode-btn").forEach((btn, i) => {
+    const active = (i === 0 && m === "generic") || (i === 1 && m === "custom");
+    btn.classList.toggle("active", active);
+  });
+
+  document.getElementById("company-card").classList.toggle("hidden", m !== "custom");
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    handleFile(e.dataTransfer.files[0]);
+  }
+}
+
+function handleFile(file) {
+  if (!file) return;
+
+  imgFile = file;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    imgSrc = event.target.result;
+
+    document.getElementById("drop-placeholder").classList.add("hidden");
+    document.getElementById("drop-preview").classList.remove("hidden");
+    document.getElementById("preview-img").src = imgSrc;
+    document.getElementById("process-btn-wrap").classList.remove("hidden");
+    document.getElementById("error-wrap").classList.add("hidden");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+async function startProcess() {
+  if (!imgFile) {
+    showError("No image loaded.");
+    return;
+  }
+
+  showScreen("processing");
+  setPill(1, "active");
+  setPill(2, "");
+  setPill(3, "");
+
+  const form = new FormData();
+  form.append("file", imgFile);
+
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      body: form
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Server error " + response.status);
+    }
+
+    extracted = data.extracted || {};
+    balloons = data.balloons || [];
+    formData = data.formData || {};
+
+    setPill(1, "done");
+    setPill(2, "done");
+    setPill(3, "done");
+
+    renderResults();
+    showScreen("results");
+
+  } catch (err) {
+    showScreen("upload");
+    showError(err.message);
+  }
+}
+
+function renderResults() {
+  const s1 = formData.s1 || {};
+  const chars = extracted.characteristics || [];
+  const rows = formData.rows || [];
+
+  document.getElementById("result-subtitle").textContent =
+    `${s1.partName || "Part"} · ${s1.partNumber || "-"} · Rev ${s1.revision || "-"}`;
+
+  document.getElementById("char-count").textContent = `${chars.length} characteristics`;
+  document.getElementById("result-img").src = imgSrc;
+
+  const overlay = document.getElementById("balloon-overlay");
+  overlay.innerHTML = "";
+
+  balloons.forEach(b => {
+    const el = document.createElement("div");
+    el.className = "overlay-balloon";
+    el.style.left = (b.x || 10) + "%";
+    el.style.top = (b.y || 10) + "%";
+    el.textContent = b.id || "?";
+    overlay.appendChild(el);
+  });
+
+  document.getElementById("legend-list").innerHTML = chars.map(c => `
+    <div class="legend-row">
+      <div class="balloon">${esc(c.id || "")}</div>
+      <div>
+        <div style="font-size:12px;color:#f1f5f9">${esc(c.description || "")}</div>
+        <div style="font-size:11px;color:#64748b">
+          Nominal:
+          <span style="color:#f97316">${esc(c.nominal || "")} ${esc(c.unit || "")}</span>
+          · Tol: ${esc(c.tolerance || "-")}
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  document.getElementById("form-rows").innerHTML = rows.map((r, i) => `
+    <tr>
+      <td style="text-align:center"><div class="balloon">${esc(r.n || i + 1)}</div></td>
+      <td style="max-width:180px;font-size:11px">${esc(r.desc || "")}</td>
+      <td style="color:#f97316;font-weight:600">${esc(r.nominal || "")}</td>
+      <td style="color:#4ade80">${esc(r.tolPlus || "")}</td>
+      <td style="color:#f87171">${esc(r.tolMinus || "")}</td>
+      <td><input class="meas" id="meas-${i}" placeholder="____"></td>
+      <td>
+        <select class="conf" id="conf-${i}">
+          <option value="">-</option>
+          <option>Y</option>
+          <option>N</option>
+        </select>
+      </td>
+      <td class="notes-cell">${esc(r.notes || "")}</td>
+    </tr>
+  `).join("");
+
+  document.getElementById("cert-list").innerHTML =
+    (formData.certs || ["Material Certification"]).map((cert, i) => `
+      <div class="cert-row">
+        <div class="balloon balloon-blue">${i + 1}</div>
+        <span style="flex:1;font-size:12px">${esc(cert)}</span>
+        <input placeholder="Cert #" style="width:140px">
+        <select style="width:54px">
+          <option>-</option>
+          <option>Y</option>
+          <option>N</option>
+        </select>
+      </div>
+    `).join("");
+
+  document.getElementById("part-info-grid").innerHTML =
+    Object.entries(s1).map(([key, value]) => `
+      <div>
+        <label class="lbl">${esc(key)}</label>
+        <input value="${esc(value || "")}">
+      </div>
+    `).join("");
+
+  const notes = extracted.generalNotes || [];
+
+  document.getElementById("notes-section").innerHTML = notes.length ? `
+    <div style="margin-top:16px">
+      <div class="sec-title">General Notes</div>
+      ${notes.map((note, i) => `
+        <div style="padding:5px 0;border-bottom:1px solid #131e30;color:#94a3b8;font-size:12px">
+          ${i + 1}. ${esc(note)}
+        </div>
+      `).join("")}
+    </div>
+  ` : "";
+
+  const tolerances = extracted.tolerances || {};
+
+  document.getElementById("tol-section").innerHTML = `
+    <div style="margin-top:16px">
+      <div class="sec-title">General Tolerances</div>
+      ${Object.entries(tolerances).map(([key, value]) => `
+        <div style="padding:5px 0;border-bottom:1px solid #131e30;color:#94a3b8;font-size:12px">
+          <strong>${esc(key)}:</strong> ${esc(value || "-")}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function exportCSV() {
+  if (!formData) return;
+
+  const s1 = formData.s1 || {};
+  const rows = formData.rows || [];
+
+  let csv = "FAI Report\n";
+  csv += `Part Number,${s1.partNumber || ""}\n`;
+  csv += `Part Name,${s1.partName || ""}\n`;
+  csv += `Revision,${s1.revision || ""}\n\n`;
+  csv += "Balloon#,Characteristic,Nominal,Tol+,Tol-,Actual,Conforming,Notes\n";
+
+  rows.forEach((r, i) => {
+    const actual = document.getElementById(`meas-${i}`)?.value || "";
+    const conform = document.getElementById(`conf-${i}`)?.value || "";
+
+    csv += `${r.n || i + 1},"${cleanCSV(r.desc || "")}","${cleanCSV(r.nominal || "")}","${cleanCSV(r.tolPlus || "")}","${cleanCSV(r.tolMinus || "")}","${cleanCSV(actual)}","${cleanCSV(conform)}","${cleanCSV(r.notes || "")}"\n`;
+  });
+
+  downloadFile(csv, `FAI_${s1.partNumber || "part"}.csv`, "text/csv");
+}
+
+function exportHTML() {
+  if (!formData) return;
+
+  const s1 = formData.s1 || {};
+  const rows = formData.rows || [];
+
+  let html = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>FAI Report</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 30px; font-size: 12px; color: #111; }
+h1 { margin-bottom: 4px; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { border: 1px solid #999; padding: 6px; text-align: left; }
+th { background: #eee; }
+.section { margin-top: 24px; font-weight: bold; font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>First Article Inspection Report</h1>
+<div>Part Number: ${esc(s1.partNumber || "")}</div>
+<div>Part Name: ${esc(s1.partName || "")}</div>
+<div>Revision: ${esc(s1.revision || "")}</div>
+<div>Drawing Number: ${esc(s1.drawingNumber || "")}</div>
+
+<div class="section">Dimensional Results</div>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Characteristic</th>
+<th>Nominal</th>
+<th>Tol+</th>
+<th>Tol-</th>
+<th>Actual</th>
+<th>Y/N</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+`;
+
+  rows.forEach((r, i) => {
+    const actual = document.getElementById(`meas-${i}`)?.value || "____";
+    const conform = document.getElementById(`conf-${i}`)?.value || "____";
+
+    html += `
+<tr>
+<td>${esc(r.n || i + 1)}</td>
+<td>${esc(r.desc || "")}</td>
+<td>${esc(r.nominal || "")}</td>
+<td>${esc(r.tolPlus || "")}</td>
+<td>${esc(r.tolMinus || "")}</td>
+<td>${esc(actual)}</td>
+<td>${esc(conform)}</td>
+<td>${esc(r.notes || "")}</td>
+</tr>
+`;
+  });
+
+  html += `
+</tbody>
+</table>
+
+<div class="section">Signatures</div>
+<br><br>
+Inspector: __________________________ Date: ____________
+<br><br>
+Quality Manager: ____________________ Date: ____________
+
+</body>
+</html>
+`;
+
+  downloadFile(html, `FAI_${s1.partNumber || "part"}.html`, "text/html");
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type: type });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function cleanCSV(value) {
+  return String(value).replace(/"/g, '""');
+}
+
+function esc(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function showScreen(name) {
+  ["upload", "processing", "results"].forEach(screen => {
+    document.getElementById("screen-" + screen).classList.toggle("hidden", screen !== name);
+  });
+}
+
+function showError(message) {
+  document.getElementById("error-wrap").classList.remove("hidden");
+  document.getElementById("error-msg").textContent = message;
+}
+
+function setPill(number, state) {
+  const pill = document.getElementById("pill-" + number);
+
+  if (!pill) return;
+
+  pill.classList.remove("done", "active");
+
+  if (state) {
+    pill.classList.add(state);
+  }
+}
+
+function showTab(name, btn) {
+  ["balloons", "form", "info"].forEach(tab => {
+    document.getElementById("tab-" + tab).classList.toggle("hidden", tab !== name);
+  });
+
+  document.querySelectorAll(".tab").forEach(tabBtn => {
+    tabBtn.classList.remove("active");
+  });
+
+  btn.classList.add("active");
+}
+
+function resetApp() {
+  imgFile = null;
+  imgSrc = null;
+  extracted = null;
+  formData = null;
+  balloons = [];
+
+  document.getElementById("drop-placeholder").classList.remove("hidden");
+  document.getElementById("drop-preview").classList.add("hidden");
+  document.getElementById("process-btn-wrap").classList.add("hidden");
+  document.getElementById("error-wrap").classList.add("hidden");
+
+  showScreen("upload");
+}
+</script>
+
+</body>
+</html>
